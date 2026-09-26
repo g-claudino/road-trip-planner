@@ -98,3 +98,14 @@ export interface LegState {
   /** True while a dragged/relocated stop is being re-routed through OSRM. */
   recalculating: boolean;
 }
+
+export interface Favorite {
+  id: string;
+  name: string;
+  start: Place;
+  end: Place;
+  intervalKm: number;
+  roundTrip: boolean;
+  returnVia: Place | null;
+  savedAt: number;
+}

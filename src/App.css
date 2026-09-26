@@ -245,12 +245,13 @@
 
 .sidebar-empty {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  align-items: stretch;
   text-align: center;
   color: var(--text);
   font-size: 14px;
-  padding: 40px 20px;
+  padding: 24px 20px;
+  gap: 20px;
 }
 
 .trip-summary {
@@ -719,7 +720,7 @@
   border-color: var(--accent);
 }
 
-.passport-section {
+.favorites-panel {
   border-top: none;
   margin-top: 0;
   padding-top: 0;
@@ -1067,4 +1068,157 @@
   background: var(--accent-soft);
   border-radius: 6px;
   padding: 5px 8px;
+}
+
+/* --- Header actions / favorite star --- */
+
+.app-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.favorite-star-btn {
+  padding: 8px 12px;
+  background: var(--bg-soft);
+  color: var(--text-h);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  height: 38px;
+}
+
+.favorite-star-btn.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* --- Favorites panel --- */
+
+.favorites-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.favorite-item {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.favorite-load-btn {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 8px 10px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.favorite-load-btn:hover {
+  border-color: var(--accent);
+}
+
+.favorite-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-h);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.favorite-meta {
+  font-size: 11.5px;
+  color: var(--text);
+}
+
+.favorite-remove-btn {
+  flex-shrink: 0;
+  width: 30px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--danger);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.favorite-remove-btn:hover {
+  background: var(--danger-soft);
+}
+
+/* --- Storage disclaimer --- */
+
+.storage-disclaimer {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2000;
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.storage-disclaimer p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.storage-disclaimer code {
+  background: var(--accent-soft);
+  color: var(--accent);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 11.5px;
+}
+
+.storage-disclaimer-btn {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (max-width: 700px) {
+  .storage-disclaimer {
+    flex-direction: column;
+    align-items: stretch;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+  }
+
+  .storage-disclaimer-btn {
+    width: 100%;
+  }
 }

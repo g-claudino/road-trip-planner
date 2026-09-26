@@ -4,6 +4,7 @@ import "./App.css";
 import type {
   BorderCrossing,
   CostSettings,
+  Favorite,
   LatLng,
   LegKey,
   LegState,
@@ -18,6 +19,8 @@ import { ItineraryPanel } from "./components/ItineraryPanel";
 import { BorderCrossingPanel } from "./components/BorderCrossingPanel";
 import { PassportSelector } from "./components/PassportSelector";
 import { CostEstimatorPanel } from "./components/CostEstimatorPanel";
+import { FavoritesPanel } from "./components/FavoritesPanel";
+import { StorageDisclaimer } from "./components/StorageDisclaimer";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { fetchRoute } from "./services/routing";
 import { fetchAttractionsNear } from "./services/attractions";
@@ -56,6 +59,22 @@ function readStoredJSON<T>(key: string, fallback: T): T {
     // localStorage unavailable or malformed — use fallback
   }
   return fallback;
+}
+
+function readStoredBool(key: string, fallback: boolean): boolean {
+  try {
+    const saved = localStorage.getItem(key);
+    if (saved === "true") return true;
+    if (saved === "false") return false;
+  } catch {
+    // localStorage unavailable — use fallback
+  }
+  return fallback;
+}
+
+function makeId(): string {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
 function sleep(ms: number) {
@@ -124,6 +143,13 @@ function App() {
   const [costSettings, setCostSettings] = useState<CostSettings>(() =>
     readStoredJSON("roadtrip-costs", DEFAULT_COST_SETTINGS),
   );
+  const [favorites, setFavorites] = useState<Favorite[]>(() =>
+    readStoredJSON("roadtrip-favorites", [] as Favorite[]),
+  );
+  const [disclaimerDismissed, setDisclaimerDismissed] = useState(() =>
+    readStoredBool("roadtrip-disclaimer-dismissed", false),
+  );
+  const [pendingFavoriteLoad, setPendingFavoriteLoad] = useState(false);
 
   const canPlan = !!start && !!end && !planning;
 
@@ -151,6 +177,24 @@ function App() {
       // ignore
     }
   }, [costSettings]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("roadtrip-favorites", JSON.stringify(favorites));
+    } catch {
+      // ignore
+    }
+  }, [favorites]);
+
+  // Fires after loadFavorite() updates start/end/etc — waiting for a render
+  // in between means handlePlan() reads the freshly-loaded values below,
+  // not the state from before the favorite was picked.
+  useEffect(() => {
+    if (!pendingFavoriteLoad) return;
+    setPendingFavoriteLoad(false);
+    handlePlan();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingFavoriteLoad]);
 
   function updateLeg(legKey: LegKey, updater: (leg: LegState) => LegState) {
     setLegs((prev) => ({ ...prev, [legKey]: updater(prev[legKey]) }));
@@ -229,6 +273,48 @@ function App() {
     } finally {
       setPlanning(false);
     }
+  }
+
+  const currentFavoriteId = favorites.find(
+    (f) => start && end && f.start.lat === start.lat && f.start.lng === start.lng &&
+      f.end.lat === end.lat && f.end.lng === end.lng,
+  )?.id;
+
+  function saveFavorite() {
+    if (!start || !end) return;
+    const favorite: Favorite = {
+      id: makeId(),
+      name: `${start.label.split(",")[0]} → ${end.label.split(",")[0]}`,
+      start,
+      end,
+      intervalKm,
+      roundTrip,
+      returnVia,
+      savedAt: Date.now(),
+    };
+    setFavorites((prev) => [favorite, ...prev]);
+  }
+
+  function removeFavorite(id: string) {
+    setFavorites((prev) => prev.filter((f) => f.id !== id));
+  }
+
+  function dismissDisclaimer() {
+    setDisclaimerDismissed(true);
+    try {
+      localStorage.setItem("roadtrip-disclaimer-dismissed", "true");
+    } catch {
+      // ignore
+    }
+  }
+
+  function loadFavorite(favorite: Favorite) {
+    setStart(favorite.start);
+    setEnd(favorite.end);
+    setIntervalKm(favorite.intervalKm);
+    setRoundTrip(favorite.roundTrip);
+    setReturnVia(favorite.returnVia);
+    setPendingFavoriteLoad(true);
   }
 
   async function loadStopAttractions(legKey: LegKey, index: number, location: LatLng) {
@@ -497,10 +583,23 @@ function App() {
       <header className="app-header">
         <div className="app-header-top">
           <h1>Road Trip Planner</h1>
-          <ThemeToggle
-            theme={theme}
-            onToggle={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
-          />
+          <div className="app-header-actions">
+            {start && end && (
+              <button
+                className={currentFavoriteId ? "favorite-star-btn active" : "favorite-star-btn"}
+                onClick={() =>
+                  currentFavoriteId ? removeFavorite(currentFavoriteId) : saveFavorite()
+                }
+                title={currentFavoriteId ? "Remove from favorites" : "Save this trip to favorites"}
+              >
+                {currentFavoriteId ? "★ Saved" : "☆ Save"}
+              </button>
+            )}
+            <ThemeToggle
+              theme={theme}
+              onToggle={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+            />
+          </div>
         </div>
         {hasAnyRoute && formCollapsed ? (
           <div className="form-summary">
@@ -573,6 +672,8 @@ function App() {
             .join(" ")}
         >
           {!hasAnyRoute && <p>Set a starting point and destination, then plan your route.</p>}
+
+          <FavoritesPanel favorites={favorites} onLoad={loadFavorite} onRemove={removeFavorite} />
 
           {hasAnyRoute && (
             <div className="sidebar-section passport-section">
@@ -659,6 +760,8 @@ function App() {
           <MapView legs={mapLegs} />
         </div>
       </main>
+
+      {!disclaimerDismissed && <StorageDisclaimer onDismiss={dismissDisclaimer} />}
     </div>
   );
 }
