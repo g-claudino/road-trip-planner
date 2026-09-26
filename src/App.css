@@ -856,3 +856,60 @@
     flex-wrap: wrap;
   }
 }
+
+/* --- Stop drag / city suggestions --- */
+
+.stop-drag-hint {
+  margin-bottom: 10px;
+}
+
+.stop-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.city-suggestion-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.city-suggestion {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  font-size: 12.5px;
+  background: var(--accent-soft);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.city-suggestion:hover {
+  border-color: var(--accent);
+}
+
+.city-suggestion-name {
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.city-suggestion-meta {
+  color: var(--text);
+  text-transform: capitalize;
+}
+
+.map-pin-hint {
+  font-size: 11px;
+  color: var(--text);
+  font-style: italic;
+  margin-top: 4px;
+}

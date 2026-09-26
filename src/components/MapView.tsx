@@ -37,6 +37,7 @@ export interface LegMapData {
   stops: RouteStop[];
   dayPlans: DayPlan[];
   route: RouteResult | null;
+  onStopDrag?: (index: number, location: LatLng) => void;
 }
 
 interface Props {
@@ -99,6 +100,17 @@ export function MapView({ legs }: Props) {
                   String(i + 1),
                   overnightIndices.has(i) ? leg.overnightColor : leg.color,
                 )}
+                draggable={!!leg.onStopDrag}
+                eventHandlers={
+                  leg.onStopDrag
+                    ? {
+                        dragend: (e) => {
+                          const pos = e.target.getLatLng();
+                          leg.onStopDrag!(i, { lat: pos.lat, lng: pos.lng });
+                        },
+                      }
+                    : undefined
+                }
               >
                 <Popup>
                   <strong>
@@ -107,6 +119,7 @@ export function MapView({ legs }: Props) {
                   </strong>
                   <div>{stop.distanceFromStartKm.toFixed(0)} km from start</div>
                   <div>~{stop.cumulativeDurationH.toFixed(1)} h driving</div>
+                  {leg.onStopDrag && <div className="map-pin-hint">Drag to move this stop</div>}
                 </Popup>
               </Marker>
             ))}

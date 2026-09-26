@@ -26,6 +26,7 @@ import {
   buildDayPlans,
   interpolateCumulative,
   pickMostDistinctRouteIndex,
+  projectPointOntoRoute,
   sampleStopsAlongRoute,
 } from "./utils/geo";
 import { DEFAULT_COST_SETTINGS, type LegCostInput } from "./data/costDefaults";
@@ -268,6 +269,29 @@ function App() {
     }
   }
 
+  function moveStop(legKey: LegKey, index: number, location: LatLng) {
+    updateLeg(legKey, (leg) => {
+      if (!leg.route) return leg;
+
+      const projection = projectPointOntoRoute(leg.route, location);
+      const stops = [...leg.stops];
+      stops[index] = {
+        ...stops[index],
+        location,
+        distanceFromStartKm: projection.distanceKm,
+        cumulativeDurationH: projection.durationH,
+        attractions: [],
+        loadingAttractions: false,
+        attractionsError: false,
+        attractionsLoaded: false,
+      };
+      stops.sort((a, b) => a.distanceFromStartKm - b.distanceFromStartKm);
+
+      const dayPlans = buildDayPlans(stops, leg.route, leg.days);
+      return { ...leg, stops, dayPlans };
+    });
+  }
+
   function selectRouteOption(legKey: LegKey, idx: number) {
     updateLeg(legKey, (leg) => {
       const chosen = leg.routeOptions[idx];
@@ -375,6 +399,7 @@ function App() {
       stops: legs.outbound.stops,
       dayPlans: legs.outbound.dayPlans,
       route: legs.outbound.route,
+      onStopDrag: (idx, location) => moveStop("outbound", idx, location),
     });
   }
   if (roundTrip && legs.return.route) {
@@ -389,6 +414,7 @@ function App() {
       stops: legs.return.stops,
       dayPlans: legs.return.dayPlans,
       route: legs.return.route,
+      onStopDrag: (idx, location) => moveStop("return", idx, location),
     });
   }
 
@@ -510,6 +536,8 @@ function App() {
             routeOptions={currentLeg.routeOptions}
             selectedRouteIndex={currentLeg.selectedRouteIndex}
             onSelectRouteOption={(idx) => selectRouteOption(currentLegKey, idx)}
+            intervalKm={intervalKm}
+            onMoveStop={(i, location) => moveStop(currentLegKey, i, location)}
           />
 
           <ItineraryPanel

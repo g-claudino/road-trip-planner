@@ -199,6 +199,80 @@ function routeDistinctnessScore(candidate: LatLng[], reference: LatLng[]): numbe
   return count === 0 ? 0 : total / count;
 }
 
+export interface RouteProjection {
+  /** Distance along the route (km) of the nearest point to the given location. */
+  distanceKm: number;
+  /** Driving time along the route (h) of the nearest point to the given location. */
+  durationH: number;
+  /** How far the given location is from the route itself (km). */
+  offRouteKm: number;
+}
+
+/**
+ * Projects an arbitrary point (a dragged marker, a suggested city) onto the
+ * route polyline, returning where along the route it falls. The point itself
+ * doesn't have to sit exactly on the route — a stop can be a real town a few
+ * km off the highway — this just answers "how far into the trip is this?"
+ * so drag-and-drop and city suggestions stay consistent with the itinerary
+ * math (day splitting, distances, driving time).
+ */
+export function projectPointOntoRoute(route: RouteResult, point: LatLng): RouteProjection {
+  const { coordinates, cumulativeDistanceKm, cumulativeDurationH } = route;
+
+  if (coordinates.length < 2) {
+    return { distanceKm: 0, durationH: 0, offRouteKm: 0 };
+  }
+
+  // Scale longitude distances by cos(latitude) so the projection isn't
+  // skewed away from the equator.
+  const kx = Math.cos((point.lat * Math.PI) / 180);
+
+  let bestDist = Infinity;
+  let bestSegment = 0;
+  let bestT = 0;
+
+  for (let i = 0; i < coordinates.length - 1; i++) {
+    const a = coordinates[i];
+    const b = coordinates[i + 1];
+
+    const ax = a.lng * kx;
+    const ay = a.lat;
+    const bx = b.lng * kx;
+    const by = b.lat;
+    const px = point.lng * kx;
+    const py = point.lat;
+
+    const dx = bx - ax;
+    const dy = by - ay;
+    const lengthSq = dx * dx + dy * dy;
+    let t = lengthSq === 0 ? 0 : ((px - ax) * dx + (py - ay) * dy) / lengthSq;
+    t = Math.max(0, Math.min(1, t));
+
+    const candidate: LatLng = {
+      lat: a.lat + (b.lat - a.lat) * t,
+      lng: a.lng + (b.lng - a.lng) * t,
+    };
+    const dist = haversineKm(point, candidate);
+
+    if (dist < bestDist) {
+      bestDist = dist;
+      bestSegment = i;
+      bestT = t;
+    }
+  }
+
+  const d0 = cumulativeDistanceKm[bestSegment];
+  const d1 = cumulativeDistanceKm[bestSegment + 1];
+  const h0 = cumulativeDurationH[bestSegment];
+  const h1 = cumulativeDurationH[bestSegment + 1];
+
+  return {
+    distanceKm: d0 + (d1 - d0) * bestT,
+    durationH: h0 + (h1 - h0) * bestT,
+    offRouteKm: bestDist,
+  };
+}
+
 /** Picks the route option (from OSRM alternatives) least similar to a reference route. */
 export function pickMostDistinctRouteIndex(
   options: RouteResult[],
