@@ -105,6 +105,36 @@
   color: var(--text);
 }
 
+/* --- Collapsed header summary --- */
+
+.form-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.form-summary-text {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-h);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.form-edit-btn {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
 .app-main {
   flex: 1;
   display: flex;
@@ -177,6 +207,40 @@
   overflow-y: auto;
   border-right: 1px solid var(--border);
   padding: 16px;
+  transition: width 0.2s ease, padding 0.2s ease;
+}
+
+.sidebar.collapsed {
+  width: 0;
+  padding: 0;
+  overflow: hidden;
+  border-right: none;
+}
+
+/* --- Sidebar/map toggle handle --- */
+
+.sidebar-toggle {
+  flex-shrink: 0;
+  width: 22px;
+  border: none;
+  border-right: 1px solid var(--border);
+  background: var(--bg-soft);
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  padding: 0;
+}
+
+.sidebar-toggle:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.toggle-icon-column {
+  display: none;
 }
 
 .sidebar-empty {
@@ -837,8 +901,29 @@
     border-bottom: 1px solid var(--border);
   }
 
+  .sidebar.collapsed {
+    max-height: 0;
+    width: 100%;
+    border-bottom: none;
+  }
+
   .sidebar-empty {
     max-height: none;
+  }
+
+  .sidebar-toggle {
+    width: 100%;
+    height: 26px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .toggle-icon-row {
+    display: none;
+  }
+
+  .toggle-icon-column {
+    display: inline;
   }
 
   .map-container {

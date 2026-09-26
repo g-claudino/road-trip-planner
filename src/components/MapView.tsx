@@ -26,6 +26,24 @@ function FitBounds({ coordinates }: { coordinates: LatLng[] }) {
   return null;
 }
 
+/** Leaflet doesn't notice its container being resized by CSS (e.g. the
+ * sidebar toggle) on its own — watch it directly so the map always fills
+ * the space it's actually given. */
+function AutoInvalidateSize() {
+  const map = useMap();
+
+  useEffect(() => {
+    const container = map.getContainer();
+    const observer = new ResizeObserver(() => {
+      map.invalidateSize();
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [map]);
+
+  return null;
+}
+
 export interface LegMapData {
   key: string;
   label: string;
@@ -56,6 +74,7 @@ export function MapView({ legs }: Props) {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
+      <AutoInvalidateSize />
       {allCoordinates.length > 0 && <FitBounds coordinates={allCoordinates} />}
 
       {legs.map((leg) => {

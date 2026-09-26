@@ -114,6 +114,8 @@ function App() {
 
   const [planning, setPlanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [formCollapsed, setFormCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const [theme, setTheme] = useState<Theme>(readStoredTheme);
   const [passports, setPassports] = useState<string[]>(() =>
@@ -221,6 +223,9 @@ function App() {
       if (roundTrip) {
         await planLeg("return", outboundRoute?.coordinates);
       }
+      // Collapse the input form once planning succeeds — the map and trip
+      // details are what matters next, especially on a small screen.
+      if (outboundRoute) setFormCollapsed(true);
     } finally {
       setPlanning(false);
     }
@@ -497,55 +502,76 @@ function App() {
             onToggle={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
           />
         </div>
-        <div className="controls">
-          <PlaceSearchInput placeholder="Starting point" value={start} onChange={setStart} />
-          <PlaceSearchInput placeholder="Destination" value={end} onChange={setEnd} />
+        {hasAnyRoute && formCollapsed ? (
+          <div className="form-summary">
+            <span className="form-summary-text">
+              {start?.label ?? "Start"} → {end?.label ?? "Destination"}
+            </span>
+            <button className="form-edit-btn" onClick={() => setFormCollapsed(false)}>
+              Edit
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="controls">
+              <PlaceSearchInput placeholder="Starting point" value={start} onChange={setStart} />
+              <PlaceSearchInput placeholder="Destination" value={end} onChange={setEnd} />
 
-          <label className="interval-control">
-            Stop every
-            <input
-              type="number"
-              min={50}
-              max={1000}
-              step={50}
-              value={intervalKm}
-              onChange={(e) => setIntervalKm(Number(e.target.value))}
-            />
-            km
-          </label>
+              <label className="interval-control">
+                Stop every
+                <input
+                  type="number"
+                  min={50}
+                  max={1000}
+                  step={50}
+                  value={intervalKm}
+                  onChange={(e) => setIntervalKm(Number(e.target.value))}
+                />
+                km
+              </label>
 
-          <button onClick={handlePlan} disabled={!canPlan}>
-            {planning ? "Planning…" : "Plan Route"}
-          </button>
-        </div>
-
-        <div className="controls round-trip-controls">
-          <label className="round-trip-toggle">
-            <input
-              type="checkbox"
-              checked={roundTrip}
-              onChange={(e) => setRoundTrip(e.target.checked)}
-            />
-            Round trip with a different return route
-          </label>
-
-          {roundTrip && (
-            <div className="return-via">
-              <span>Return via (optional)</span>
-              <PlaceSearchInput
-                placeholder="Waypoint for the way back"
-                value={returnVia}
-                onChange={setReturnVia}
-              />
+              <button onClick={handlePlan} disabled={!canPlan}>
+                {planning ? "Planning…" : "Plan Route"}
+              </button>
             </div>
-          )}
-        </div>
+
+            <div className="controls round-trip-controls">
+              <label className="round-trip-toggle">
+                <input
+                  type="checkbox"
+                  checked={roundTrip}
+                  onChange={(e) => setRoundTrip(e.target.checked)}
+                />
+                Round trip with a different return route
+              </label>
+
+              {roundTrip && (
+                <div className="return-via">
+                  <span>Return via (optional)</span>
+                  <PlaceSearchInput
+                    placeholder="Waypoint for the way back"
+                    value={returnVia}
+                    onChange={setReturnVia}
+                  />
+                </div>
+              )}
+            </div>
+          </>
+        )}
 
         {error && <div className="error-banner">{error}</div>}
       </header>
 
       <main className="app-main">
-        <div className={hasAnyRoute ? "sidebar" : "sidebar sidebar-empty"}>
+        <div
+          className={[
+            "sidebar",
+            !hasAnyRoute && "sidebar-empty",
+            sidebarCollapsed && "collapsed",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
           {!hasAnyRoute && <p>Set a starting point and destination, then plan your route.</p>}
 
           {hasAnyRoute && (
@@ -616,6 +642,18 @@ function App() {
 
           <CostEstimatorPanel settings={costSettings} onChange={setCostSettings} legs={costLegs} />
         </div>
+
+        {hasAnyRoute && (
+          <button
+            className="sidebar-toggle"
+            onClick={() => setSidebarCollapsed((v) => !v)}
+            title={sidebarCollapsed ? "Show trip details" : "Hide trip details (more map)"}
+            aria-label={sidebarCollapsed ? "Show trip details" : "Hide trip details"}
+          >
+            <span className="toggle-icon-row">{sidebarCollapsed ? "▶" : "◀"}</span>
+            <span className="toggle-icon-column">{sidebarCollapsed ? "▼" : "▲"}</span>
+          </button>
+        )}
 
         <div className="map-container">
           <MapView legs={mapLegs} />
