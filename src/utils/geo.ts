@@ -199,6 +199,27 @@ function routeDistinctnessScore(candidate: LatLng[], reference: LatLng[]): numbe
   return count === 0 ? 0 : total / count;
 }
 
+/**
+ * Finds the closest point on the route's polyline to an arbitrary location
+ * (e.g. a toll booth found nearby) and returns how far into the trip that
+ * point is — a "which km mark is this near" lookup, not a precise
+ * projection, but plenty for labeling a point of interest.
+ */
+export function nearestDistanceKmOnRoute(route: RouteResult, point: LatLng): number {
+  let bestIdx = 0;
+  let bestDist = Infinity;
+
+  for (let i = 0; i < route.coordinates.length; i++) {
+    const d = haversineKm(point, route.coordinates[i]);
+    if (d < bestDist) {
+      bestDist = d;
+      bestIdx = i;
+    }
+  }
+
+  return route.cumulativeDistanceKm[bestIdx] ?? 0;
+}
+
 /** Picks the route option (from OSRM alternatives) least similar to a reference route. */
 export function pickMostDistinctRouteIndex(
   options: RouteResult[],

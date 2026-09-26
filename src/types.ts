@@ -78,7 +78,16 @@ export interface CostSettings {
   fuelEconomyKmPerL: number;
   fuelPricePerL: number;
   tollPer100Km: number;
+  tollPerBooth: number;
   hotelPerNight: number;
+}
+
+export interface TollBooth {
+  id: number;
+  name: string | null;
+  lat: number;
+  lng: number;
+  distanceFromStartKm: number;
 }
 
 export type LegKey = "outbound" | "return";
@@ -97,6 +106,10 @@ export interface LegState {
   borderError: string | null;
   /** True while a dragged/relocated stop is being re-routed through OSRM. */
   recalculating: boolean;
+  /** null = not yet checked; an array (possibly empty) once detection has run. */
+  tollBooths: TollBooth[] | null;
+  detectingTolls: boolean;
+  tollError: string | null;
 }
 
 export interface Favorite {

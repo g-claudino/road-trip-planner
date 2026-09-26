@@ -25,6 +25,7 @@ import { ThemeToggle } from "./components/ThemeToggle";
 import { fetchRoute } from "./services/routing";
 import { fetchAttractionsNear } from "./services/attractions";
 import { reverseGeocode } from "./services/geocoding";
+import { findTollBooths } from "./services/tolls";
 import {
   buildDayPlans,
   interpolateCumulative,
@@ -94,6 +95,9 @@ const EMPTY_LEG: LegState = {
   detectingBorders: false,
   borderError: null,
   recalculating: false,
+  tollBooths: null,
+  detectingTolls: false,
+  tollError: null,
 };
 
 function computeLegDerived(route: RouteResult, intervalKm: number, maxHoursPerDay: number) {
@@ -219,6 +223,9 @@ function App() {
       borderCrossings: [],
       borderError: null,
       recalculating: false,
+      tollBooths: null,
+      detectingTolls: false,
+      tollError: null,
     }));
 
     try {
@@ -412,6 +419,8 @@ function App() {
           borderCrossings: [],
           borderError: null,
           recalculating: false,
+          tollBooths: null,
+          tollError: null,
         };
       });
     } catch (err) {
@@ -444,6 +453,8 @@ function App() {
         ...derived,
         borderCrossings: [],
         borderError: null,
+        tollBooths: null,
+        tollError: null,
       };
     });
   }
@@ -510,6 +521,27 @@ function App() {
     }
   }
 
+  async function detectTolls(legKey: LegKey) {
+    const leg = legs[legKey];
+    if (!leg.route) return;
+
+    updateLeg(legKey, (l) => ({ ...l, detectingTolls: true, tollError: null }));
+
+    try {
+      const booths = await findTollBooths(leg.route);
+      updateLeg(legKey, (l) => ({ ...l, detectingTolls: false, tollBooths: booths }));
+    } catch (err) {
+      updateLeg(legKey, (l) => ({
+        ...l,
+        detectingTolls: false,
+        tollError:
+          err instanceof Error
+            ? err.message
+            : "Couldn't check for toll booths (the free lookup service may be busy).",
+      }));
+    }
+  }
+
   const outboundSuggestedDays = legs.outbound.route
     ? Math.max(1, Math.ceil(legs.outbound.route.durationH / maxHoursPerDay))
     : 1;
@@ -563,16 +595,24 @@ function App() {
   const costLegs: LegCostInput[] = [];
   if (legs.outbound.route) {
     costLegs.push({
+      key: "outbound",
       label: "Outbound",
       distanceKm: legs.outbound.route.distanceKm,
       nights: Math.max(0, legs.outbound.dayPlans.length - 1),
+      tollBooths: legs.outbound.tollBooths,
+      detectingTolls: legs.outbound.detectingTolls,
+      tollError: legs.outbound.tollError,
     });
   }
   if (roundTrip && legs.return.route) {
     costLegs.push({
+      key: "return",
       label: "Return",
       distanceKm: legs.return.route.distanceKm,
       nights: Math.max(0, legs.return.dayPlans.length - 1),
+      tollBooths: legs.return.tollBooths,
+      detectingTolls: legs.return.detectingTolls,
+      tollError: legs.return.tollError,
     });
   }
 
@@ -741,7 +781,12 @@ function App() {
             hasRoute={!!currentLeg.route}
           />
 
-          <CostEstimatorPanel settings={costSettings} onChange={setCostSettings} legs={costLegs} />
+          <CostEstimatorPanel
+            settings={costSettings}
+            onChange={setCostSettings}
+            legs={costLegs}
+            onDetectTolls={detectTolls}
+          />
         </div>
 
         {hasAnyRoute && (
