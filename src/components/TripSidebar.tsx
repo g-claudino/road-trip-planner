@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { LatLng, RouteResult, RouteStop } from "../types";
 import { fetchNearbyCities, MAX_CITY_SEARCH_RADIUS_KM, type CityCandidate } from "../services/cities";
+import { ExportRoutePanel } from "./ExportRoutePanel";
 
 /** A stop has no stable id, so key ephemeral UI state off its location —
  * this naturally invalidates itself when a stop is dragged or reordered,
@@ -12,6 +13,8 @@ function stopKey(stop: RouteStop): string {
 interface Props {
   route: RouteResult | null;
   stops: RouteStop[];
+  origin?: LatLng | null;
+  destination?: LatLng | null;
   startLabel?: string;
   endLabel?: string;
   onLoadStop?: (index: number) => void;
@@ -22,11 +25,14 @@ interface Props {
   onSelectRouteOption?: (index: number) => void;
   intervalKm?: number;
   onMoveStop?: (index: number, location: LatLng) => void;
+  recalculating?: boolean;
 }
 
 export function TripSidebar({
   route,
   stops,
+  origin,
+  destination,
   startLabel,
   endLabel,
   onLoadStop,
@@ -37,6 +43,7 @@ export function TripSidebar({
   onSelectRouteOption,
   intervalKm = 350,
   onMoveStop,
+  recalculating = false,
 }: Props) {
   const [citySuggestions, setCitySuggestions] = useState<Record<string, CityCandidate[]>>({});
   const [loadingCities, setLoadingCities] = useState<Record<string, boolean>>({});
@@ -106,6 +113,22 @@ export function TripSidebar({
           <button className="load-all-btn" onClick={onLoadAll}>
             Load attractions for all stops
           </button>
+        )}
+
+        {recalculating && (
+          <div className="stop-attractions-loading recalculating-note">
+            Recalculating the route through the moved stop…
+          </div>
+        )}
+
+        {origin && destination && (
+          <ExportRoutePanel
+            origin={origin}
+            destination={destination}
+            stops={stops.map((s) => s.location)}
+            startLabel={startLabel ?? "Start"}
+            endLabel={endLabel ?? "Destination"}
+          />
         )}
       </div>
 

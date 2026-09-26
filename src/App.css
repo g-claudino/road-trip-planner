@@ -913,3 +913,73 @@
   font-style: italic;
   margin-top: 4px;
 }
+
+.recalculating-note {
+  margin-top: 10px;
+}
+
+/* --- Export route --- */
+
+.export-routes {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.export-routes-label {
+  display: block;
+  font-size: 12px;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.export-routes-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.export-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.export-btn:hover {
+  background: var(--accent);
+  color: white;
+}
+
+.export-waze-toggle {
+  display: block;
+  margin-top: 8px;
+  font-size: 11.5px;
+  text-align: left;
+  white-space: normal;
+}
+
+.export-leg-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.export-leg-list a {
+  display: block;
+  font-size: 12px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 6px;
+  padding: 5px 8px;
+}

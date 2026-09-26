@@ -7,7 +7,11 @@ interface OsrmRoute {
   geometry: { coordinates: [number, number][] };
   distance: number;
   duration: number;
-  legs?: { annotation?: { duration?: number[]; distance?: number[] } }[];
+  legs?: {
+    distance: number;
+    duration: number;
+    annotation?: { duration?: number[]; distance?: number[] };
+  }[];
 }
 
 function parseRoute(route: OsrmRoute): RouteResult {
@@ -47,12 +51,25 @@ function parseRoute(route: OsrmRoute): RouteResult {
     }
   }
 
+  // Per-waypoint cumulative distance/duration (one entry per waypoint,
+  // starting at 0 for the origin) — lets callers know exactly how far into
+  // the trip each waypoint (e.g. a stop the route is forced through) falls,
+  // without needing to re-project it onto the geometry.
+  const waypointDistanceKm: number[] = [0];
+  const waypointDurationH: number[] = [0];
+  for (const leg of route.legs ?? []) {
+    waypointDistanceKm.push(waypointDistanceKm[waypointDistanceKm.length - 1] + leg.distance / 1000);
+    waypointDurationH.push(waypointDurationH[waypointDurationH.length - 1] + leg.duration / 3600);
+  }
+
   return {
     coordinates,
     distanceKm,
     durationH,
     cumulativeDistanceKm,
     cumulativeDurationH,
+    waypointDistanceKm,
+    waypointDurationH,
   };
 }
 

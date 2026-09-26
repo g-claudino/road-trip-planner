@@ -36,6 +36,10 @@ export interface RouteResult {
   cumulativeDistanceKm: number[];
   /** Cumulative driving time (h) at each coordinate, same length as coordinates. */
   cumulativeDurationH: number[];
+  /** Cumulative distance (km) at each waypoint passed to OSRM, index 0 = origin (0km). */
+  waypointDistanceKm: number[];
+  /** Cumulative driving time (h) at each waypoint passed to OSRM, index 0 = origin (0h). */
+  waypointDurationH: number[];
 }
 
 export interface DayPlan {
@@ -91,4 +95,6 @@ export interface LegState {
   borderCrossings: BorderCrossing[];
   detectingBorders: boolean;
   borderError: string | null;
+  /** True while a dragged/relocated stop is being re-routed through OSRM. */
+  recalculating: boolean;
 }

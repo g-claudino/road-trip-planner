@@ -26,7 +26,6 @@ import {
   buildDayPlans,
   interpolateCumulative,
   pickMostDistinctRouteIndex,
-  projectPointOntoRoute,
   sampleStopsAlongRoute,
 } from "./utils/geo";
 import { DEFAULT_COST_SETTINGS, type LegCostInput } from "./data/costDefaults";
@@ -75,6 +74,7 @@ const EMPTY_LEG: LegState = {
   borderCrossings: [],
   detectingBorders: false,
   borderError: null,
+  recalculating: false,
 };
 
 function computeLegDerived(route: RouteResult, intervalKm: number, maxHoursPerDay: number) {
@@ -172,6 +172,7 @@ function App() {
       dayPlans: [],
       borderCrossings: [],
       borderError: null,
+      recalculating: false,
     }));
 
     try {
@@ -269,27 +270,75 @@ function App() {
     }
   }
 
-  function moveStop(legKey: LegKey, index: number, location: LatLng) {
-    updateLeg(legKey, (leg) => {
-      if (!leg.route) return leg;
+  async function moveStop(legKey: LegKey, index: number, location: LatLng) {
+    const leg = legs[legKey];
+    const origin = legKey === "outbound" ? start : end;
+    const destination = legKey === "outbound" ? end : start;
+    if (!leg.route || !origin || !destination) return;
 
-      const projection = projectPointOntoRoute(leg.route, location);
-      const stops = [...leg.stops];
+    const previousLocation = leg.stops[index].location;
+
+    // Move the marker immediately so dragging feels responsive; the actual
+    // route (and every stop's distance/duration) is corrected once OSRM
+    // re-routes through the new waypoint list.
+    updateLeg(legKey, (l) => {
+      const stops = [...l.stops];
       stops[index] = {
         ...stops[index],
         location,
-        distanceFromStartKm: projection.distanceKm,
-        cumulativeDurationH: projection.durationH,
         attractions: [],
         loadingAttractions: false,
         attractionsError: false,
         attractionsLoaded: false,
       };
-      stops.sort((a, b) => a.distanceFromStartKm - b.distanceFromStartKm);
-
-      const dayPlans = buildDayPlans(stops, leg.route, leg.days);
-      return { ...leg, stops, dayPlans };
+      return { ...l, stops, recalculating: true, error: null };
     });
+
+    try {
+      const waypoints: LatLng[] = [
+        { lat: origin.lat, lng: origin.lng },
+        ...leg.stops.map((s, i) => (i === index ? location : s.location)),
+        { lat: destination.lat, lng: destination.lng },
+      ];
+
+      const [newRoute] = await fetchRoute(waypoints);
+
+      updateLeg(legKey, (l) => {
+        const stops = l.stops.map((s, i) => ({
+          ...s,
+          distanceFromStartKm: newRoute.waypointDistanceKm[i + 1],
+          cumulativeDurationH: newRoute.waypointDurationH[i + 1],
+        }));
+        const dayPlans = buildDayPlans(stops, newRoute, l.days);
+
+        return {
+          ...l,
+          route: newRoute,
+          routeOptions: [newRoute],
+          selectedRouteIndex: 0,
+          stops,
+          dayPlans,
+          borderCrossings: [],
+          borderError: null,
+          recalculating: false,
+        };
+      });
+    } catch (err) {
+      // Couldn't route through that point — put the stop back where it was.
+      updateLeg(legKey, (l) => {
+        const stops = [...l.stops];
+        stops[index] = { ...stops[index], location: previousLocation };
+        return {
+          ...l,
+          stops,
+          recalculating: false,
+          error:
+            err instanceof Error
+              ? err.message
+              : "Couldn't recalculate the route through that point.",
+        };
+      });
+    }
   }
 
   function selectRouteOption(legKey: LegKey, idx: number) {
@@ -400,6 +449,7 @@ function App() {
       dayPlans: legs.outbound.dayPlans,
       route: legs.outbound.route,
       onStopDrag: (idx, location) => moveStop("outbound", idx, location),
+      recalculating: legs.outbound.recalculating,
     });
   }
   if (roundTrip && legs.return.route) {
@@ -415,6 +465,7 @@ function App() {
       dayPlans: legs.return.dayPlans,
       route: legs.return.route,
       onStopDrag: (idx, location) => moveStop("return", idx, location),
+      recalculating: legs.return.recalculating,
     });
   }
 
@@ -526,6 +577,8 @@ function App() {
           <TripSidebar
             route={currentLeg.route}
             stops={currentLeg.stops}
+            origin={currentLegKey === "outbound" ? start : end}
+            destination={currentLegKey === "outbound" ? end : start}
             startLabel={(currentLegKey === "outbound" ? start : end)?.label}
             endLabel={(currentLegKey === "outbound" ? end : start)?.label}
             onLoadStop={(i) =>
@@ -538,6 +591,7 @@ function App() {
             onSelectRouteOption={(idx) => selectRouteOption(currentLegKey, idx)}
             intervalKm={intervalKm}
             onMoveStop={(i, location) => moveStop(currentLegKey, i, location)}
+            recalculating={currentLeg.recalculating}
           />
 
           <ItineraryPanel
