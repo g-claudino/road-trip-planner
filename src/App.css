@@ -778,3 +778,81 @@
   font-size: 13px;
   margin-top: 4px;
 }
+
+/* --- Mobile layout --- */
+
+@media (max-width: 700px) {
+  .app-header {
+    padding: 10px 14px;
+  }
+
+  .app-header h1 {
+    font-size: 17px;
+  }
+
+  .controls {
+    gap: 8px;
+  }
+
+  .place-search {
+    width: 100%;
+  }
+
+  .interval-control {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .controls > button {
+    width: 100%;
+  }
+
+  .round-trip-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .return-via {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .return-via .place-search {
+    width: 100%;
+  }
+
+  .app-main {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex: 0 0 auto;
+    max-height: 45vh;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-empty {
+    max-height: none;
+  }
+
+  .map-container {
+    flex: 1 1 auto;
+    min-height: 280px;
+  }
+
+  .itinerary-controls,
+  .cost-inputs {
+    gap: 10px;
+  }
+
+  .route-options-list,
+  .leg-tabs {
+    flex-wrap: wrap;
+  }
+}
