@@ -1,0 +1,780 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+}
+
+.app-header {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.app-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.app-header h1 {
+  font-size: 20px;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.controls button {
+  padding: 8px 18px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  height: 38px;
+}
+
+.controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.interval-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.interval-control input {
+  width: 70px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.error-banner {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.theme-toggle {
+  padding: 8px 14px;
+  background: var(--bg-soft);
+  color: var(--text-h);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  height: 38px;
+}
+
+.round-trip-controls {
+  margin-top: 10px;
+  align-items: center;
+}
+
+.round-trip-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.return-via {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--text);
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.map-container {
+  flex: 1;
+  min-width: 0;
+}
+
+/* --- Place search --- */
+
+.place-search {
+  position: relative;
+  width: 260px;
+}
+
+.place-search input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  height: 38px;
+}
+
+.place-search-status {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  font-size: 12px;
+  color: var(--text);
+  padding: 4px 2px;
+}
+
+.place-search-suggestions {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.place-search-suggestions li {
+  padding: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.place-search-suggestions li:hover {
+  background: rgba(37, 99, 235, 0.1);
+}
+
+/* --- Sidebar --- */
+
+.sidebar {
+  width: 340px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--border);
+  padding: 16px;
+}
+
+.sidebar-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--text);
+  font-size: 14px;
+  padding: 40px 20px;
+}
+
+.trip-summary {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.trip-summary h2 {
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.trip-summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 3px 0;
+}
+
+.stop-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+.stop-item {
+  padding: 0 0 16px 0;
+  border-left: 2px solid var(--border);
+  margin-left: 13px;
+  padding-left: 18px;
+  position: relative;
+}
+
+.stop-item:last-child {
+  border-left: 2px solid transparent;
+}
+
+.stop-item-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.stop-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: -31px;
+  flex-shrink: 0;
+}
+
+.stop-badge-a {
+  background: #1d8f4a;
+}
+
+.stop-badge-b {
+  background: #c0392b;
+}
+
+.stop-item-endpoint .stop-item-header {
+  font-size: 13px;
+}
+
+.stop-attractions-loading {
+  font-size: 12px;
+  color: var(--text);
+  margin-top: 6px;
+  font-style: italic;
+}
+
+.stop-attractions-error {
+  font-size: 12px;
+  color: var(--danger);
+  margin-top: 6px;
+}
+
+.retry-link {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.load-attractions-btn {
+  margin-top: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid rgba(37, 99, 235, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.load-attractions-btn:hover {
+  background: rgba(37, 99, 235, 0.15);
+}
+
+.load-all-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 7px 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--accent);
+  background: none;
+  border: 1px dashed rgba(37, 99, 235, 0.4);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.load-all-btn:hover {
+  background: var(--accent-soft);
+}
+
+.attraction-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.attraction-list li {
+  display: flex;
+  flex-direction: column;
+  font-size: 12.5px;
+  background: var(--accent-soft);
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+
+.attraction-name {
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.attraction-meta {
+  color: var(--text);
+  text-transform: capitalize;
+}
+
+/* --- Sidebar sections --- */
+
+.sidebar-section {
+  border-top: 1px solid var(--border);
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+.sidebar-section h2 {
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+
+/* --- Itinerary panel --- */
+
+.itinerary-controls {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.itinerary-controls label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--text);
+}
+
+.itinerary-controls input {
+  width: 56px;
+  padding: 5px 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.itinerary-suggestion {
+  font-size: 12px;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.day-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.day-item {
+  background: var(--bg-soft);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.day-item-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.day-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  font-size: 10.5px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.day-item-end {
+  font-size: 12px;
+  color: var(--text);
+  margin-top: 4px;
+  margin-left: 28px;
+}
+
+/* --- Passport selector --- */
+
+.passport-selector {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.passport-selector-trigger {
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text-h);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.passport-selector-trigger .chevron {
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+.passport-selector-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  padding: 8px;
+}
+
+.passport-selector-dropdown input[type="text"] {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 6px;
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.passport-selector-dropdown ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.passport-selector-dropdown li label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 4px;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.passport-selector-dropdown li label:hover {
+  background: var(--accent-soft);
+}
+
+.passport-selector-dropdown .no-match {
+  padding: 6px 4px;
+  font-size: 12.5px;
+  color: var(--text);
+}
+
+/* --- Border crossing panel --- */
+
+.border-disclaimer {
+  font-size: 11.5px;
+  color: var(--text);
+  background: var(--bg-soft);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin: 0 0 10px;
+  line-height: 1.5;
+}
+
+.border-disclaimer a {
+  color: var(--accent);
+}
+
+.border-hint {
+  font-size: 12.5px;
+  color: var(--text);
+}
+
+.border-loading {
+  font-size: 12.5px;
+  color: var(--text);
+  font-style: italic;
+}
+
+.detect-btn {
+  padding: 7px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: white;
+  background: var(--accent);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.detect-btn-secondary {
+  margin-top: 10px;
+  background: none;
+  color: var(--accent);
+  border: 1px dashed var(--border);
+}
+
+.crossing-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.crossing-card {
+  background: var(--bg-soft);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.crossing-card-start {
+  opacity: 0.75;
+}
+
+.crossing-card h3 {
+  font-size: 13px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.crossing-km {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text);
+}
+
+.passport-requirement-list,
+.generic-checklist {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.passport-requirement-list strong {
+  color: var(--text-h);
+}
+
+.generic-checklist {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+}
+
+/* --- Map pins --- */
+
+.map-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  border: 2px solid white;
+}
+
+/* --- Leg tabs --- */
+
+.leg-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.leg-tab {
+  flex: 1;
+  padding: 7px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--bg-soft);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.leg-tab.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.passport-section {
+  border-top: none;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+/* --- Route options --- */
+
+.route-options {
+  margin: 10px 0;
+}
+
+.route-options-label {
+  display: block;
+  font-size: 12px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.route-options-list {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.route-option {
+  padding: 5px 9px;
+  font-size: 11.5px;
+  font-weight: 600;
+  background: var(--bg-soft);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.route-option.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* --- Overnight badge --- */
+
+.overnight-badge {
+  color: #0f766e;
+  font-size: 13px;
+  margin-left: 2px;
+}
+
+:root[data-theme="dark"] .overnight-badge {
+  color: #2dd4bf;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .overnight-badge {
+    color: #2dd4bf;
+  }
+}
+
+/* --- Cost estimator --- */
+
+.cost-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.cost-inputs label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11.5px;
+  color: var(--text);
+}
+
+.cost-inputs input {
+  width: 72px;
+  padding: 5px 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.cost-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cost-leg-row {
+  background: var(--bg-soft);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.cost-leg-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-h);
+  margin-bottom: 4px;
+}
+
+.cost-leg-items {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.cost-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+  margin-top: 4px;
+}
