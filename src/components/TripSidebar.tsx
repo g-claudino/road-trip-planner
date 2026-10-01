@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { LatLng, RouteResult, RouteStop } from "../types";
 import { fetchNearbyCities, MAX_CITY_SEARCH_RADIUS_KM, type CityCandidate } from "../services/cities";
-import { ExportRoutePanel } from "./ExportRoutePanel";
 
 /** A stop has no stable id, so key ephemeral UI state off its location —
  * this naturally invalidates itself when a stop is dragged or reordered,
@@ -13,8 +12,6 @@ function stopKey(stop: RouteStop): string {
 interface Props {
   route: RouteResult | null;
   stops: RouteStop[];
-  origin?: LatLng | null;
-  destination?: LatLng | null;
   startLabel?: string;
   endLabel?: string;
   onLoadStop?: (index: number) => void;
@@ -31,8 +28,6 @@ interface Props {
 export function TripSidebar({
   route,
   stops,
-  origin,
-  destination,
   startLabel,
   endLabel,
   onLoadStop,
@@ -119,16 +114,6 @@ export function TripSidebar({
           <div className="stop-attractions-loading recalculating-note">
             Recalculating the route through the moved stop…
           </div>
-        )}
-
-        {origin && destination && (
-          <ExportRoutePanel
-            origin={origin}
-            destination={destination}
-            stops={stops.map((s) => s.location)}
-            startLabel={startLabel ?? "Start"}
-            endLabel={endLabel ?? "Destination"}
-          />
         )}
       </div>
 

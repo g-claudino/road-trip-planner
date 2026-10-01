@@ -1052,6 +1052,12 @@
   border-top: 1px solid var(--border);
 }
 
+.sidebar-section > .export-routes:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
 .export-routes-label {
   display: block;
   font-size: 12px;

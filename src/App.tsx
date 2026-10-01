@@ -15,6 +15,7 @@ import type {
 import { PlaceSearchInput } from "./components/PlaceSearchInput";
 import { MapView, type LegMapData } from "./components/MapView";
 import { TripSidebar } from "./components/TripSidebar";
+import { ExportRoutePanel } from "./components/ExportRoutePanel";
 import { ItineraryPanel } from "./components/ItineraryPanel";
 import { BorderCrossingPanel } from "./components/BorderCrossingPanel";
 import { PassportSelector } from "./components/PassportSelector";
@@ -744,8 +745,6 @@ function App() {
           <TripSidebar
             route={currentLeg.route}
             stops={currentLeg.stops}
-            origin={currentLegKey === "outbound" ? start : end}
-            destination={currentLegKey === "outbound" ? end : start}
             startLabel={(currentLegKey === "outbound" ? start : end)?.label}
             endLabel={(currentLegKey === "outbound" ? end : start)?.label}
             onLoadStop={(i) =>
@@ -760,6 +759,29 @@ function App() {
             onMoveStop={(i, location) => moveStop(currentLegKey, i, location)}
             recalculating={currentLeg.recalculating}
           />
+
+          {start && end && legs.outbound.route && (
+            <div className="sidebar-section">
+              <ExportRoutePanel
+                label={showTabs ? "Outbound" : undefined}
+                origin={start}
+                destination={end}
+                stops={legs.outbound.stops.map((s) => s.location)}
+                startLabel={start.label}
+                endLabel={end.label}
+              />
+              {showTabs && legs.return.route && (
+                <ExportRoutePanel
+                  label="Return"
+                  origin={end}
+                  destination={start}
+                  stops={legs.return.stops.map((s) => s.location)}
+                  startLabel={end.label}
+                  endLabel={start.label}
+                />
+              )}
+            </div>
+          )}
 
           <ItineraryPanel
             route={currentLeg.route}

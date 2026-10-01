@@ -8,9 +8,10 @@ interface Props {
   stops: LatLng[];
   startLabel: string;
   endLabel: string;
+  label?: string;
 }
 
-export function ExportRoutePanel({ origin, destination, stops, startLabel, endLabel }: Props) {
+export function ExportRoutePanel({ origin, destination, stops, startLabel, endLabel, label }: Props) {
   const [showWazeLegs, setShowWazeLegs] = useState(false);
 
   const googleUrl = buildGoogleMapsUrl(origin, destination, stops);
@@ -19,7 +20,7 @@ export function ExportRoutePanel({ origin, destination, stops, startLabel, endLa
 
   return (
     <div className="export-routes">
-      <span className="export-routes-label">Export route</span>
+      <span className="export-routes-label">Export route{label ? ` — ${label}` : ""}</span>
       <div className="export-routes-buttons">
         <a className="export-btn" href={googleUrl} target="_blank" rel="noreferrer">
           Open in Google Maps ↗
